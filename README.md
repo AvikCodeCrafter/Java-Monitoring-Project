@@ -131,3 +131,152 @@ A working set of CI and CD release GitHub Actions workflows are provided `.githu
 
 - Mar 2021 - Version bumps, unit tests
 - Dec 2019 - First version
+
+---
+
+# 🚀 Java Spring Boot Deployment Guide (EC2 - Ubuntu)
+
+This document explains how to run a Spring Boot application in the
+background on an Ubuntu EC2 instance.
+
+------------------------------------------------------------------------
+
+## 📌 1️⃣ Check If Port 8080 Is Already in Use
+
+``` bash
+sudo lsof -i :8080
+```
+
+If you see a process running, note the PID and stop it:
+
+``` bash
+sudo kill -9 <PID>
+```
+
+------------------------------------------------------------------------
+
+## 📌 2️⃣ Run Application in Background (Temporary Method)
+
+``` bash
+java -jar java-demoapp-1.0.0.jar &
+```
+
+Check running jobs:
+
+``` bash
+jobs
+```
+
+⚠️ Note: The application may stop when SSH session closes.
+
+------------------------------------------------------------------------
+
+## 📌 3️⃣ Run Application in Background (Recommended - nohup)
+
+``` bash
+nohup java -jar java-demoapp-1.0.0.jar > app.log 2>&1 &
+```
+
+### 🔎 Check Logs
+
+``` bash
+tail -f app.log
+```
+
+This ensures: - App keeps running after logout - Logs are stored in
+`app.log` - Errors are redirected properly
+
+------------------------------------------------------------------------
+
+## 📌 4️⃣ Production-Ready Method (Systemd Service - Recommended)
+
+### Step 1: Create Service File
+
+``` bash
+sudo nano /etc/systemd/system/demoapp.service
+```
+
+### Step 2: Add Below Configuration
+
+``` ini
+[Unit]
+Description=Java Demo App
+After=network.target
+
+[Service]
+User=ubuntu
+WorkingDirectory=/home/ubuntu/Java-Monitoring-Project/target
+ExecStart=/usr/bin/java -jar java-demoapp-1.0.0.jar
+SuccessExitStatus=143
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+```
+
+------------------------------------------------------------------------
+
+### Step 3: Reload Systemd & Start Service
+
+``` bash
+sudo systemctl daemon-reload
+sudo systemctl start demoapp
+sudo systemctl enable demoapp
+sudo systemctl status demoapp
+```
+
+------------------------------------------------------------------------
+
+## 📌 5️⃣ Stop / Restart Service
+
+``` bash
+sudo systemctl stop demoapp
+sudo systemctl restart demoapp
+```
+
+------------------------------------------------------------------------
+
+## 📌 6️⃣ Run on Custom Port (Optional)
+
+``` bash
+java -jar java-demoapp-1.0.0.jar --server.port=9090
+```
+
+Or update in `application.properties`:
+
+``` properties
+server.port=9090
+```
+
+------------------------------------------------------------------------
+
+## 🎯 Best Practice (DevOps Standard)
+
+-   Use **Systemd** for process management
+-   Do not manually run apps in production
+-   Use reverse proxy (Nginx) or Load Balancer
+-   Monitor application using Prometheus & Grafana
+-   Store logs centrally (ELK / CloudWatch)
+
+------------------------------------------------------------------------
+
+## ✅ Verify Application
+
+``` bash
+sudo lsof -i :8080
+```
+
+Access in browser:
+
+    http://<EC2-Public-IP>:8080
+
+------------------------------------------------------------------------
+
+## 🏆 Resume Highlight
+
+> Deployed Spring Boot application on AWS EC2 using Systemd for process
+> management with automatic restart and background execution.
+
+------------------------------------------------------------------------
+
