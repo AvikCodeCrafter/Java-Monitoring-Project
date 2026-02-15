@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     tools {
-        maven "M3"
+        maven "M3"  # Make sure to install maven in server and In jenkins from UI and name it is as M3
     }
 
     stages {
