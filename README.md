@@ -39,7 +39,7 @@ Live instances:
 Clone the project to any directory where you do development work
 
 ```
-git clone https://github.com/benc-uk/java-demoapp.git
+https://github.com/AvikCodeCrafter/Java-Monitoring-Project.git
 ```
 
 ### Makefile
